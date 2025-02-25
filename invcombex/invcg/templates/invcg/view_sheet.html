@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ file_name }} - {{ sheet_name }}</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-tabledit@1.0.0/jquery.tabledit.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css">
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
 </head>
 <body>
@@ -16,20 +15,60 @@
         {{ table_html|safe }}
     </div>
 
-    <!-- Inicializar DataTables -->
+    <!-- Inicializar DataTables y habilitar edición en línea -->
     <script>
         $(document).ready(function() {
-        // Hacer las tablas editables
-        $('#DataTables_Table_0').Tabledit({
-            url: '{% url "save_data" %}',  // URL para guardar los cambios
-            columns: {
-                identifier: [0, 'id'],  // Columna de identificación
-                editable: [[1, 'col1'], [2, 'col2']]  // Columnas editables
-                }
+            // Inicializar DataTables
+            var table = $('table').DataTable();
+
+            // Habilitar edición en línea
+            $('table tbody').on('dblclick', 'td', function() {
+                var cell = table.cell(this);
+                var currentValue = cell.data();
+                var input = $('<input type="text">').val(currentValue);
+
+                // Reemplazar la celda con un campo de entrada
+                cell.data('').node().append(input);
+                input.focus();
+
+                // Guardar el cambio al presionar Enter
+                input.on('keypress', function(e) {
+                    if (e.which === 13) {  // 13 es el código de la tecla Enter
+                        var newValue = input.val();
+                        cell.data(newValue).draw();
+
+                        // Enviar los cambios al servidor
+                        var row = cell.index().row;
+                        var column = cell.index().column;
+                        var file_name = "{{ file_name }}";
+                        var sheet_name = "{{ sheet_name }}";
+
+                        $.ajax({
+                            url: '{% url "save_data" %}',
+                            method: 'POST',
+                            data: {
+                                file_name: file_name,
+                                sheet_name: sheet_name,
+                                row_id: row,
+                                column_name: table.column(column).header().innerText,
+                                new_value: newValue
+                            },
+                            success: function(response) {
+                                if (response.status === 'success') {
+                                    console.log('Cambio guardado correctamente.');
+                                } else {
+                                    console.error('Error al guardar el cambio:', response.message);
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Error en la solicitud AJAX:', error);
+                            }
+                        });
+                    }
+                });
             });
         });
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
     <a href="{% url 'view_sheets' file_name %}">Volver a la lista de hojas</a>
 </body>

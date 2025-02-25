@@ -78,13 +78,12 @@ def list_files(request):
 @csrf_exempt
 def save_data(request):
     if request.method == 'POST':
-        # Obtener los datos enviados por Tabledit
-        data = request.POST
-        file_name = data.get('file_name')
-        sheet_name = data.get('sheet_name')
-        row_id = data.get('id')
-        column_name = data.get('column')
-        new_value = data.get('value')
+        # Obtener los datos enviados por AJAX
+        file_name = request.POST.get('file_name')
+        sheet_name = request.POST.get('sheet_name')
+        row_id = request.POST.get('row_id')
+        column_name = request.POST.get('column_name')
+        new_value = request.POST.get('new_value')
 
         # Validar los datos recibidos
         if not all([file_name, sheet_name, row_id, column_name, new_value]):
