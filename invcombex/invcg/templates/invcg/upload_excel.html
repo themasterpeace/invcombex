@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Subir archivo Excel</title>
+    <!-- Agrega Tabledit -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/tabledit@1.0.0/dist/jquery.tabledit.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/tabledit@1.0.0/dist/jquery.tabledit.min.js"></script>
+    
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css">
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+</head>
+<body>
+    <h1>Subir archivo Excel</h1>
+
+    <!-- Mostrar mensajes -->
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" action="{% url 'upload_excel' %}">
+        {% csrf_token %}
+        <input type="file" name="excel_file" accept=".xlsx, .xls">
+        <button type="submit">Subir archivo</button>
+    </form>
+
+    <!-- Mostrar las hojas del archivo Excel -->
+    {% if sheets %}
+        {% for sheet_name, table_html in sheets.items %}
+            <h2>{{ sheet_name }}</h2>
+            <div class="table-responsive">
+                {{ table_html|safe }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Inicializar DataTables para cada tabla -->
+    <script>
+        $(document).ready(function() {
+            $('table').each(function() {
+                $(this).DataTable();
+            });
+        });
+
+
+        $(document).ready(function() {
+            $('table').each(function() {
+                $(this).DataTable();
+
+                // Hacer las tablas editables
+                $(this).Tabledit({
+                    url: '{% url "save_data" %}',  // URL para guardar los cambios
+                    columns: {
+                        identifier: [0, 'id'],  // Columna de identificación
+                        editable: [[1, 'col1'], [2, 'col2']]  // Columnas editables
+                    }
+                });
+            });
+        });
+
+    </script>
+</body>
+</html>

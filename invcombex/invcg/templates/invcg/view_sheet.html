@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ file_name }} - {{ sheet_name }}</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/tabledit@1.0.0/dist/jquery.tabledit.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/tabledit@1.0.0/dist/jquery.tabledit.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css">
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+</head>
+<body>
+    <h1>{{ file_name }} - {{ sheet_name }}</h1>
+
+    <!-- Mostrar la tabla -->
+    <div class="table-responsive">
+        {{ table_html|safe }}
+    </div>
+
+    <!-- Inicializar DataTables -->
+    <script>
+        $(document).ready(function() {
+            $('table').DataTable();
+        });
+
+        $(document).ready(function() {
+        $('table').DataTable();
+
+        // Hacer las tablas editables
+        $('table').Tabledit({
+            url: '{% url "save_data" %}',  // URL para guardar los cambios
+            columns: {
+                identifier: [0, 'id'],  // Columna de identificación
+                editable: [[1, 'col1'], [2, 'col2']]  // Columnas editables
+                }
+            });
+        });
+    </script>
+
+    <a href="{% url 'view_sheets' file_name %}">Volver a la lista de hojas</a>
+</body>
+</html>

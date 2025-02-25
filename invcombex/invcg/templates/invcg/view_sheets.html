@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ file_name }}</title>
+</head>
+<body>
+    <h1>{{ file_name }}</h1>
+
+    <!-- Listar las hojas del archivo Excel -->
+    <ul>
+        {% for sheet_name in sheets.keys %}
+            <li>
+                <a href="{% url 'view_sheet' file_name sheet_name %}">{{ sheet_name }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <a href="{% url 'list_files' %}">Volver a la lista de archivos</a>
+</body>
+</html>
