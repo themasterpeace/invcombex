@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ file_name }} - {{ sheet_name }}</title>
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/tabledit@1.0.0/dist/jquery.tabledit.min.css">
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/tabledit@1.0.0/dist/jquery.tabledit.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-tabledit@1.0.0/jquery.tabledit.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css">
-    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
 </head>
 <body>
@@ -20,14 +19,8 @@
     <!-- Inicializar DataTables -->
     <script>
         $(document).ready(function() {
-            $('table').DataTable();
-        });
-
-        $(document).ready(function() {
-        $('table').DataTable();
-
         // Hacer las tablas editables
-        $('table').Tabledit({
+        $('#DataTables_Table_0').Tabledit({
             url: '{% url "save_data" %}',  // URL para guardar los cambios
             columns: {
                 identifier: [0, 'id'],  // Columna de identificación
@@ -36,6 +29,7 @@
             });
         });
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
     <a href="{% url 'view_sheets' file_name %}">Volver a la lista de hojas</a>
 </body>

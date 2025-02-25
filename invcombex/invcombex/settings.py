@@ -80,7 +80,7 @@ DATABASES = {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'invcombex',
             'USER': 'root',
-            'PASSWORD': '023ManEse*',
+            'PASSWORD': '021ManEse*',
             'HOST': 'localhost',
             'PORT': '3306',
         }
