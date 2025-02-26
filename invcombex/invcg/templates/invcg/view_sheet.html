@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ file_name }} - {{ sheet_name }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css">
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" ></script>
 </head>
 <body>
     <h1>{{ file_name }} - {{ sheet_name }}</h1>
@@ -21,51 +23,80 @@
             // Inicializar DataTables
             var table = $('table').DataTable();
 
-            // Habilitar edición en línea
-            $('table tbody').on('dblclick', 'td', function() {
-                var cell = table.cell(this);
-                var currentValue = cell.data();
+            // Función para habilitar la edición en una celda
+            function enableEdit(cell) {
+                var currentValue = cell.data();  // Obtener el valor actual de la celda
+
+                // Crear un campo de entrada con el valor actual
                 var input = $('<input type="text">').val(currentValue);
 
-                // Reemplazar la celda con un campo de entrada
-                cell.data('').node().append(input);
+                // Reemplazar el contenido de la celda con el campo de entrada
+                $(cell.node()).empty().append(input);
                 input.focus();
 
-                // Guardar el cambio al presionar Enter
-                input.on('keypress', function(e) {
+                // Guardar el cambio al presionar Enter o Tab
+                input.on('keydown', function(e) {
                     if (e.which === 13) {  // 13 es el código de la tecla Enter
-                        var newValue = input.val();
-                        cell.data(newValue).draw();
-
-                        // Enviar los cambios al servidor
-                        var row = cell.index().row;
-                        var column = cell.index().column;
-                        var file_name = "{{ file_name }}";
-                        var sheet_name = "{{ sheet_name }}";
-
-                        $.ajax({
-                            url: '{% url "save_data" %}',
-                            method: 'POST',
-                            data: {
-                                file_name: file_name,
-                                sheet_name: sheet_name,
-                                row_id: row,
-                                column_name: table.column(column).header().innerText,
-                                new_value: newValue
-                            },
-                            success: function(response) {
-                                if (response.status === 'success') {
-                                    console.log('Cambio guardado correctamente.');
-                                } else {
-                                    console.error('Error al guardar el cambio:', response.message);
-                                }
-                            },
-                            error: function(xhr, status, error) {
-                                console.error('Error en la solicitud AJAX:', error);
-                            }
-                        });
+                        saveChanges(cell, input.val());
+                    } else if (e.which === 9) {  // 9 es el código de la tecla Tab
+                        e.preventDefault();  // Evitar el comportamiento por defecto del Tab
+                        saveChanges(cell, input.val());  // Guardar cambios en la celda actual
+                        moveToNextCell(cell);  // Mover a la siguiente celda
                     }
                 });
+            }
+
+            // Función para guardar los cambios en una celda
+            function saveChanges(cell, newValue) {
+                cell.data(newValue).draw();
+
+                // Enviar los cambios al servidor
+                var row = cell.index().row;
+                var column = cell.index().column;
+                var file_name = "{{ file_name }}";
+                var sheet_name = "{{ sheet_name }}";
+
+                $.ajax({
+                    url: '{% url "save_data" %}',
+                    method: 'POST',
+                    data: {
+                        file_name: file_name,
+                        sheet_name: sheet_name,
+                        row_id: row,
+                        column_name: table.column(column).header().innerText,
+                        new_value: newValue
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            console.log('Cambio guardado correctamente.');
+                        } else {
+                            console.error('Error al guardar el cambio:', response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error en la solicitud AJAX:', error);
+                    }
+                });
+            }
+
+            // Función para mover a la siguiente celda
+            function moveToNextCell(currentCell) {
+                var nextCell = table.cell(currentCell.index()).node().nextElementSibling;
+
+                if (nextCell) {
+                    enableEdit(table.cell(nextCell));
+                } else {
+                    // Si no hay siguiente celda, mover a la primera celda de la siguiente fila
+                    var nextRow = currentCell.index().row + 1;
+                    if (nextRow < table.rows().count()) {
+                        enableEdit(table.cell(nextRow, 0));
+                    }
+                }
+            }
+
+            // Habilitar edición al hacer clic en una celda
+            $('table tbody').on('click', 'td', function() {
+                enableEdit(table.cell(this));
             });
         });
     </script>

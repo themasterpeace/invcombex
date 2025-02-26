@@ -19,20 +19,10 @@ def upload_excel(request):
         # Mensaje de éxito
         messages.success(request, f'Archivo "{excel_file.name}" subido correctamente.')
 
-        # Leer el archivo Excel con pandas
-        try:
-            excel_data = pd.ExcelFile(upload_path)
-            sheets = {}
-            for sheet_name in excel_data.sheet_names:
-                df = excel_data.parse(sheet_name)
-                sheets[sheet_name] = df.to_html(classes='table table-bordered', index=False)
+        # Redirigir a la lista de archivos
+        return redirect('list_files')  # Redirige a la vista list_files
 
-            # Pasar los datos al template
-            return render(request, 'invcg/upload_excel.html', {'sheets': sheets})
-        except Exception as e:
-            messages.error(request, f'Error al procesar el archivo: {str(e)}')
-            return redirect('upload_excel')
-
+    # Si no es una solicitud POST, mostrar el formulario de subida
     return render(request, 'invcg/upload_excel.html')
 
 def view_sheets(request, file_name):
